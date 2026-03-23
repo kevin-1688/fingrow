@@ -397,6 +397,27 @@ input[type=range] { width: 100%; accent-color: var(--pg); cursor: pointer; }
 .fit-bottomnav .nav-item.active { border-top-color:var(--fire); color:var(--fire); }
 .badge.locked { opacity:0.6; }
 .badge.locked .badge-icon { filter: grayscale(1); }
+
+/* ── CONFETTI ─────────────────────────────────────────── */
+.confetti-piece {
+  position: fixed; width: 8px; height: 8px; top: -10px;
+  pointer-events: none; z-index: 9999; border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg) translateX(var(--dx)); opacity: 0; }
+}
+
+/* ── BADGE TOAST ─────────────────────────────────────── */
+#badge-toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #0d0d0d; border: 2px solid var(--gold);
+  color: var(--gold); font-family: 'Press Start 2P', monospace; font-size: 8px;
+  padding: 8px 14px; opacity: 0; transition: opacity .3s, transform .3s;
+  z-index: 998; pointer-events: none; white-space: nowrap; text-align: center;
+  line-height: 1.8;
+}
 </style>
 </head>
 <body>
@@ -1205,9 +1226,18 @@ function screenNavKey(id) {
 
 // ── ADD ENTRY ─────────────────────────────────────────────
 const catMap = {
-  exp: { zh:['餐飲','交通','租房','娛樂','購物','醫療','訂閱','其他'], en:['Dining','Transport','Rent','Fun','Shopping','Medical','Subs','Other'] },
-  inc: { zh:['薪資','獎金','副業','禮金','退款','其他'], en:['Salary','Bonus','Side gig','Gift','Refund','Other'] },
-  inv: { zh:['ETF','股票','定存','加密貨幣','房產','其他'], en:['ETF','Stocks','Deposit','Crypto','Property','Other'] },
+  exp: {
+    zh:['🍜 餐飲','🚇 交通','🏠 租房','🎮 娛樂','🛍 購物','💊 醫療','📱 訂閱','📦 其他'],
+    en:['🍜 Dining','🚇 Transport','🏠 Rent','🎮 Fun','🛍 Shopping','💊 Medical','📱 Subs','📦 Other']
+  },
+  inc: {
+    zh:['💰 薪資','🎁 獎金','💼 副業','🧧 禮金','↩️ 退款','📦 其他'],
+    en:['💰 Salary','🎁 Bonus','💼 Side gig','🧧 Gift','↩️ Refund','📦 Other']
+  },
+  inv: {
+    zh:['📈 ETF','📊 股票','🏦 定存','🪙 加密貨幣','🏗 房產','📦 其他'],
+    en:['📈 ETF','📊 Stocks','🏦 Deposit','🪙 Crypto','🏗 Property','📦 Other']
+  },
 };
 const submitLabels = {
   exp: { zh:'記錄支出！', en:'Log Expense!' },
@@ -1258,22 +1288,55 @@ function showLevelUp(lv) {
   const el = document.getElementById('levelup-toast');
   if (!el) return;
   el.textContent = '▲ LV.' + lv + ' 升級！解鎖新徽章！';
-  el.style.opacity = '1'; el.style.transform = 'translateY(0)';
-  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(-20px)'; }, 2500);
+  el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)';
+  fireConfetti();
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(-20px)'; }, 2500);
+}
+
+// ── CONFETTI ──────────────────────────────────────────────
+function fireConfetti() {
+  const colors = ['#00FF41','#FFD700','#FF6B2B','#4488FF','#FF4444','#AA88FF'];
+  for (let i = 0; i < 36; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const x = Math.random() * 100;
+    const dx = (Math.random() - 0.5) * 120;
+    const dur = 0.8 + Math.random() * 0.8;
+    el.style.cssText = `
+      left:${x}vw;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      --dx:${dx}px;
+      animation-duration:${dur}s;
+      width:${5+Math.random()*6}px;
+      height:${5+Math.random()*6}px;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), dur * 1000 + 100);
+  }
+}
+
+// ── BADGE TOAST ───────────────────────────────────────────
+function showBadgeToast(icon, name) {
+  const el = document.getElementById('badge-toast');
+  if (!el) return;
+  el.innerHTML = `新徽章解鎖！<br>${icon} ${name}`;
+  el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)';
+  fireConfetti();
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(20px)'; }, 2800);
 }
 
 // ── ACHIEVEMENT SYSTEM ────────────────────────────────────
 let achState = { logCount:0, investDone:false, streak:3, savingsOk:true };
 
 const achievements = [
-  { id:'a1', icon:'★', zh:'7天連登',   en:'7-Day Login',   done:true,  condZh:'每天開啟 App',             condEn:'Open app daily' },
-  { id:'a2', icon:'◆', zh:'首筆投資',  en:'First Invest',  done:true,  condZh:'完成第一筆投資紀錄',       condEn:'Log first investment' },
-  { id:'a3', icon:'▲', zh:'重訓3天',   en:'Train 3 Days',  done:true,  condZh:'連續訓練 3 天',             condEn:'Train 3 days straight' },
-  { id:'a4', icon:'♦', zh:'存款5萬',   en:'50K Saved',     done:false, condZh:'累積儲蓄達 NT$50,000',     condEn:'Save NT$50,000 total' },
-  { id:'a5', icon:'●', zh:'30天達標',  en:'30-Day Goal',   done:false, condZh:'連續 30 天記帳',           condEn:'Log 30 days in a row' },
-  { id:'a6', icon:'◈', zh:'鐵人理財',  en:'Iron Planner',  done:false, condZh:'連續 14 天記帳',           condEn:'Log 14 days straight' },
-  { id:'a7', icon:'✦', zh:'複利覺醒',  en:'Compound Mind', done:false, condZh:'使用複利試算超過 5 次',    condEn:'Use compound calc 5+ times' },
-  { id:'a8', icon:'◉', zh:'深蹲百公斤',en:'Squat 100kg',   done:false, condZh:'深蹲重量達 100kg',         condEn:'Squat 100kg' },
+  { id:'a1', icon:'★', zh:'7天連登',    en:'7-Day Login',   done:true,  condZh:'每天開啟 App',          condEn:'Open app daily' },
+  { id:'a2', icon:'◆', zh:'首筆投資',   en:'First Invest',  done:true,  condZh:'完成第一筆投資紀錄',    condEn:'Log first investment' },
+  { id:'a3', icon:'▲', zh:'重訓3天',    en:'Train 3 Days',  done:true,  condZh:'連續訓練 3 天',          condEn:'Train 3 days straight' },
+  { id:'a4', icon:'♦', zh:'存款5萬',    en:'50K Saved',     done:false, condZh:'累積儲蓄達 NT$50,000',  condEn:'Save NT$50,000 total' },
+  { id:'a5', icon:'●', zh:'30天達標',   en:'30-Day Goal',   done:false, condZh:'連續 30 天記帳',        condEn:'Log 30 days in a row' },
+  { id:'a6', icon:'◈', zh:'鐵人理財',   en:'Iron Planner',  done:false, condZh:'連續 14 天記帳',        condEn:'Log 14 days straight' },
+  { id:'a7', icon:'✦', zh:'複利覺醒',   en:'Compound Mind', done:false, condZh:'使用複利試算超過 5 次', condEn:'Use compound calc 5+ times' },
+  { id:'a8', icon:'◉', zh:'深蹲百公斤', en:'Squat 100kg',   done:false, condZh:'深蹲重量達 100kg',      condEn:'Squat 100kg' },
 ];
 
 function renderAchievements() {
@@ -1295,7 +1358,19 @@ function renderAchievements() {
 
 function checkAchievements() {
   achState.logCount++;
-  if (achState.logCount >= 1) achievements[3].done = false; // 50k needs real savings
+  // 首次記帳 → 解鎖鐵人理財進度
+  if (achState.logCount >= 14 && !achievements[5].done) {
+    achievements[5].done = true;
+    showBadgeToast(achievements[5].icon, lang==='zh'?achievements[5].zh:achievements[5].en);
+  }
+  if (achState.logCount >= 30 && !achievements[4].done) {
+    achievements[4].done = true;
+    showBadgeToast(achievements[4].icon, lang==='zh'?achievements[4].zh:achievements[4].en);
+  }
+  // 投資記錄 → 解鎖首筆投資（demo: 第一次 inv type）
+  if (entryType === 'inv' && !achievements[1]._counted) {
+    achievements[1]._counted = true;
+  }
   renderAchievements();
 }
 
@@ -1351,6 +1426,8 @@ function submitEntry() {
   const icon = document.getElementById('fb-icon');
   icon.style.transform = 'scale(1.5)';
   setTimeout(() => { icon.style.transition='transform .3s'; icon.style.transform='scale(1)'; }, 100);
+  // confetti on income/invest
+  if (entryType === 'inc' || entryType === 'inv') fireConfetti();
   // update live panel
   addXP(f.xp);
   if (entryType === 'inc') updateDashMetric('val-income-live', amt, '+');
@@ -1640,5 +1717,7 @@ window.gotoScreen = function(id) {
   if (id === 's-paywall') setTimeout(showTrialSummary, 50);
 };
 </script>
+<div id="badge-toast"></div>
+
 </body>
 </html>
