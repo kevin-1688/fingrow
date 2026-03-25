@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>GRINDVAULT v1.0</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00FF41">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grindvault">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- SEO -->
+<meta name="description" content="Gamified finance & fitness tracker. Level up your wealth and body with pixel RPG mechanics.">
+<meta property="og:title" content="Grindvault — Level Up Your Life">
+<meta property="og:description" content="Track money and fitness like an RPG. Earn XP, unlock gear, grow your wealth.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kevin-1688.github.io/grindvault/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Grindvault">
+<meta name="twitter:description" content="Gamified finance & fitness tracker — level up your wealth and body">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -2017,5 +2035,13 @@ window.gotoScreen = function(id) {
 </script>
 <div id="badge-toast"></div>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(err => console.log('SW reg failed:', err));
+  });
+}
+</script>
 </body>
 </html>
