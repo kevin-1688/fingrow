@@ -2222,7 +2222,7 @@ function hideCompoundGate() {
 }
 
 // ── AI REPORT (via Vercel serverless — API key stays server-side) ─
-const API_BASE = 'https://grindvault.vercel.app'; // ← 部署後換成你的 Vercel 網址
+const API_BASE = 'https://grindvault-anr1.vercel.app';
 
 async function generateAIReport() {
   if (!isPro) { gotoScreen('s-paywall'); return; }
@@ -2300,4 +2300,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
