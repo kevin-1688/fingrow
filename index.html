@@ -2119,15 +2119,6 @@ function logStrength() {
   fitAttrs.vit = Math.min(99, fitAttrs.vit + 1);
   updateAttrs();
   const xp = Math.round(vol / 100) + 10;
-  const list = document.getElementById('ex-list');
-  const item = document.createElement('div');
-  item.className = 'exercise-item';
-  item.innerHTML = `<div class="ex-name">${name}</div><div class="ex-detail">${sets}組 × ${weight}kg × ${reps}次</div><div class="ex-xp">+${xp}XP</div>`;
-  list.appendChild(item);
-  document.getElementById('ex-name').value = '';
-  document.getElementById('ex-sets').value = '';
-  document.getElementById('ex-weight').value = '';
-  document.getElementById('ex-reps').value = '';
   if (parseFloat(weight) >= 100 && name.includes('深蹲')) { achievements[7].done = true; renderAchievements(); }
   const detail = lang==='zh'
     ? `${sets}組 × ${weight}kg × ${reps}次`
