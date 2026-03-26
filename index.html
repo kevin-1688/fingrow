@@ -2202,6 +2202,9 @@ function saveState() {
 
 function loadState() {
   freeUsed = parseInt(localStorage.getItem('gv_free_used') || '0');
+  // isPro from localStorage is a temporary cache only.
+  // It gets overridden by server truth in loadCloudData() on every login/session restore.
+  // Not logged in = isPro always false (set in restoreSession)
   isPro = localStorage.getItem('gv_is_pro') === '1';
 }
 
@@ -2299,16 +2302,20 @@ function hideCompoundGate() {
 
 // ── AI REPORT (via Vercel serverless — API key stays server-side) ─
 const API_BASE = 'https://grindvault-anr1.vercel.app';
+
+// Supabase publishable key is safe to expose in frontend (protected by RLS)
 const SUPABASE_URL = 'https://tbjfmokudwqcriejwpld.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = localStorage.getItem('gv_sb_key') || '';
+const SUPABASE_PUB_KEY = 'sb_publishable_mwdmPV0P-r50SaqqO_EB7g_RJce5pNY';
 
 // ── AUTH & CLOUD SYNC ─────────────────────────────────────
 let currentUser = null;
+// PRO status: ONLY set from server after login. Never trust localStorage alone.
+// isPro from localStorage is used as a cache but always overridden by server on login.
 
 async function signUp(email, password) {
   const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': getSBKey() },
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_PUB_KEY },
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json();
@@ -2319,7 +2326,7 @@ async function signUp(email, password) {
 async function signIn(email, password) {
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': getSBKey() },
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_PUB_KEY },
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json();
@@ -2338,13 +2345,13 @@ function signOut() {
   localStorage.removeItem('gv_token');
   localStorage.removeItem('gv_uid');
   localStorage.removeItem('gv_email');
+  // Reset PRO to false on sign out — must re-verify from server on next login
+  isPro = false;
+  localStorage.setItem('gv_is_pro', '0');
   currentUser = null;
+  updateProUI();
+  updateFreeCounter();
   updateAuthUI();
-}
-
-function getSBKey() {
-  // Publishable key stored in localStorage after first load from Vercel env
-  return localStorage.getItem('gv_sb_pub') || '';
 }
 
 function restoreSession() {
@@ -2354,7 +2361,15 @@ function restoreSession() {
   if (token && uid) {
     currentUser = { id: uid, email, token };
     updateAuthUI();
+    // Always re-verify PRO from server on session restore
     loadCloudData();
+  } else {
+    // Not logged in: reset any local PRO claim to false for safety
+    // (localStorage can be tampered — without server verification, no PRO)
+    isPro = false;
+    localStorage.setItem('gv_is_pro', '0');
+    updateProUI();
+    updateFreeCounter();
   }
 }
 
@@ -2364,19 +2379,23 @@ async function loadCloudData() {
     const res = await fetch(`${API_BASE}/api/load?user_id=${currentUser.id}`);
     if (!res.ok) return;
     const data = await res.json();
-    // Update PRO status from server
-    if (data.user?.is_pro) {
-      isPro = true;
-      saveState();
+
+    // Server is the single source of truth for PRO status
+    const serverIsPro = data.user?.is_pro === true;
+    if (serverIsPro !== isPro) {
+      isPro = serverIsPro;
+      localStorage.setItem('gv_is_pro', isPro ? '1' : '0');
       updateProUI();
       updateFreeCounter();
     }
-    // Restore transaction count
+
+    // Restore transaction count from server
     if (data.transactions?.length) {
       freeUsed = Math.max(freeUsed, data.transactions.length);
-      saveState();
+      localStorage.setItem('gv_free_used', freeUsed);
       updateFreeCounter();
     }
+
     updateAuthUI();
     showSyncToast(lang === 'zh' ? '☁ 雲端資料已同步' : '☁ Cloud data synced');
   } catch(e) {
