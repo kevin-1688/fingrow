@@ -155,19 +155,21 @@ html, body {
 /* ── BOTTOMNAV ─────────────────────────── */
 .bottomnav {
   display: flex; border-top: 2px solid var(--border);
-  background: var(--panel2); flex-shrink: 0; position: sticky; bottom: 0; z-index: 10;
+  background: var(--panel2); flex-shrink: 0;
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; z-index: 100;
 }
 .nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 10px 0 8px; cursor: pointer; border-top: 2px solid transparent;
+  padding: 12px 0 10px; cursor: pointer; border-top: 2px solid transparent;
   transition: all 0.15s; font-size: 12px; color: var(--dim); background: none; border-left: none; border-right: none; border-bottom: none;
   font-family: 'Space Mono', monospace;
 }
 .nav-item.active { border-top-color: var(--pg); color: var(--pg); }
-.nav-item svg { width: 18px; height: 18px; }
+.nav-item svg { width: 20px; height: 20px; }
 
-/* ── SCROLLABLE CONTENT ────────────────── */
-.scroll-body { flex: 1; overflow-y: auto; }
+/* pad scroll-body so content doesn't hide behind fixed nav */
+.scroll-body { flex: 1; overflow-y: auto; padding-bottom: 72px; }
 
 /* ── METRIC GRID ───────────────────────── */
 .metric-grid {
@@ -824,7 +826,7 @@ body::after {
 
   <div class="scroll-body">
 
-    <!-- ── HERO: avatar + dual XP bars ── -->
+    <!-- ── HERO ── -->
     <div class="hero">
       <div class="avatar">
         <div class="avatar-crown" id="avatar-crown">👑</div>
@@ -850,27 +852,21 @@ body::after {
         </div>
         <div style="position:relative">
           <div class="xpbar-wrap">
-            <div class="xpbar-lbl" data-i="lbl_savings">儲蓄率</div>
-            <div class="xpbar"><div class="xpbar-fill" style="width:62%"></div></div>
-            <div class="xpbar-val">62%</div>
-          </div>
-          <div class="xpbar-wrap" style="margin-bottom:2px">
-            <div class="xpbar-lbl" style="font-size:13px;color:var(--gold)">XP</div>
+            <div class="xpbar-lbl" style="color:var(--gold)">XP</div>
             <div class="xpbar"><div class="xpbar-fill" id="xp-progress-bar" style="width:40%;background:var(--gold);"></div></div>
             <div class="xpbar-val" style="color:var(--gold);font-size:13px;" id="xp-progress-lbl">40/100</div>
           </div>
           <div id="xp-floater" style="position:absolute;right:0;top:-14px;font-family:'Press Start 2P',monospace;font-size:12px;color:var(--gold);opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;">+XP</div>
         </div>
         <div class="xpbar-wrap">
-          <div class="xpbar-lbl" style="color:var(--fire)">STR</div>
-          <div class="xpbar"><div class="xpbar-fill" id="home-str-bar" style="width:48%;background:var(--fire)"></div></div>
-          <div class="xpbar-val" style="color:var(--fire)" id="home-str-val">24</div>
+          <div class="xpbar-lbl" data-i="lbl_savings">儲蓄率</div>
+          <div class="xpbar"><div class="xpbar-fill" style="width:62%"></div></div>
+          <div class="xpbar-val">62%</div>
         </div>
       </div>
     </div>
 
     <!-- ── FINANCE METRICS ── -->
-    <div style="padding:10px 16px 4px;font-size:12px;color:var(--dim);letter-spacing:2px;background:var(--panel2);border-bottom:1px solid var(--border);" data-i="wealth_label">◆ WEALTH QUEST</div>
     <div class="metric-grid">
       <div class="m-card">
         <div class="m-label" data-i="lbl_income">本月收入</div>
@@ -890,63 +886,34 @@ body::after {
     </div>
     <div id="levelup-toast" style="position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:#001a00;border:2px solid var(--gold);color:var(--gold);font-family:'Press Start 2P',monospace;font-size:13px;padding:8px 16px;opacity:0;transition:opacity .4s,transform .4s;z-index:999;pointer-events:none;white-space:nowrap;"></div>
 
-    <!-- ── BODY TECH METRICS ── -->
-    <div style="padding:10px 16px 4px;font-size:12px;color:#664422;letter-spacing:2px;background:#0d0500;border-bottom:1px solid #2a1a0a;border-top:1px solid #2a1a0a;" data-i="body_label">▲ BODY TECH</div>
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#2a1a0a;border-bottom:1px solid #2a1a0a;">
-      <div style="background:#0d0500;padding:11px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:5px;">STR</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--str);" id="dash-str">24</div>
+    <!-- ── COMPACT BODY STATS ── -->
+    <div style="display:flex;gap:1px;background:var(--border);border-top:1px solid var(--border);">
+      <div style="flex:1;background:var(--panel);padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">STR</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--str);" id="dash-str">24</div>
       </div>
-      <div style="background:#0d0500;padding:11px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:5px;">AGI</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--agi);" id="dash-agi">18</div>
+      <div style="flex:1;background:var(--panel);padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">AGI</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--agi);" id="dash-agi">18</div>
       </div>
-      <div style="background:#0d0500;padding:11px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:5px;">VIT</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--vit);" id="dash-vit">31</div>
+      <div style="flex:1;background:var(--panel);padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">VIT</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--vit);" id="dash-vit">31</div>
       </div>
-      <div style="background:#0d0500;padding:11px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:5px;">SPI</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--spi);" id="dash-spi">22</div>
+      <div style="flex:1;background:var(--panel);padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">SPI</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--spi);" id="dash-spi">22</div>
       </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#2a1a0a;border-bottom:1px solid #2a1a0a;">
-      <div style="background:#0d0500;padding:10px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:4px;">體重</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--fire);" id="dash-weight">72.5 <span style="font-size:12px;color:#664422">kg</span></div>
+      <div style="flex:1;background:#0d0500;padding:10px 8px;text-align:center;cursor:pointer;" onclick="gotoScreen('s-fit')">
+        <div style="font-size:11px;color:#664422;margin-bottom:4px;" data-i="nav5">健身</div>
+        <div style="font-size:14px;color:var(--fire);">▲</div>
       </div>
-      <div style="background:#0d0500;padding:10px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:4px;">體脂</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--fire);" id="dash-fat">18.2 <span style="font-size:12px;color:#664422">%</span></div>
-      </div>
-      <div style="background:#0d0500;padding:10px 8px;text-align:center;">
-        <div style="font-size:13px;color:#664422;margin-bottom:4px;" data-i="streak_label">連續天數</div>
-        <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--amber);">3 <span style="font-size:12px;color:#664422">天</span></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;padding:10px 16px;background:#0d0500;border-bottom:1px solid #2a1a0a;">
-      <button onclick="gotoScreen('s-fit')" style="flex:1;padding:8px;background:#1a0800;border:1px solid var(--fire);color:var(--fire);font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;" data-i="btn_train">▲ 訓練記錄</button>
-      <button onclick="gotoScreen('s-fit');setFitTab('body')" style="flex:1;padding:8px;background:#1a0800;border:1px solid #664422;color:#664422;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;" data-i="btn_body">● 更新身體</button>
     </div>
 
     <!-- ── ACHIEVEMENTS ── -->
     <div class="section">
       <div class="section-title" data-i="lbl_achievement">成就徽章</div>
       <div class="badge-row" id="achievement-list" style="flex-wrap:wrap;gap:6px;"></div>
-    </div>
-
-    <!-- ── FINANCE TREND ── -->
-    <div class="section">
-      <div class="section-title" data-i="lbl_trend">收支走勢</div>
-      <div class="bar-chart">
-        <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-lbl">3M</div></div>
-        <div class="bar-col"><div class="bar" style="height:55%"></div><div class="bar-lbl">4M</div></div>
-        <div class="bar-col"><div class="bar" style="height:48%"></div><div class="bar-lbl">5M</div></div>
-        <div class="bar-col"><div class="bar" style="height:70%"></div><div class="bar-lbl">6M</div></div>
-        <div class="bar-col"><div class="bar exp" style="height:36%"></div><div class="bar-lbl" data-i="bar_exp">支出</div></div>
-        <div class="bar-col"><div class="bar cur" style="height:82%"></div><div class="bar-lbl" data-i="bar_now">本月</div></div>
-      </div>
-      <div class="savings-note" data-i="savings_note">▶ 本月儲蓄率 62% — 裝備解鎖中...</div>
     </div>
 
     <!-- ── RECENT TX ── -->
@@ -963,33 +930,13 @@ body::after {
           <div class="tx-info"><div class="tx-name" data-i="tx2n">租房費用</div><div class="tx-cat" data-i="tx2c">固定消耗</div></div>
           <div class="tx-amt neg">-12,000</div>
         </div>
-        <div class="tx" style="border-left-color:var(--fire)">
-          <div class="tx-icon" style="color:var(--fire)">▲</div>
-          <div class="tx-info"><div class="tx-name">深蹲 4×80kg×8</div><div class="tx-cat" style="color:#664422">重訓 · STR+1</div></div>
-          <div class="tx-amt" style="color:var(--amber)">+25XP</div>
-        </div>
         <div class="tx inv">
           <div class="tx-icon">●</div>
           <div class="tx-info"><div class="tx-name" data-i="tx3n">ETF 定期定額</div><div class="tx-cat" data-i="tx3c">放置型收益</div></div>
           <div class="tx-amt inv">+1,240</div>
         </div>
       </div>
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <button class="add-btn" style="flex:1;margin:0;" onclick="gotoScreen('s-add')">+ <span data-i="add_btn">記帳</span></button>
-        <button class="add-btn" style="flex:1;margin:0;border-color:#664422;color:#664422;" onclick="gotoScreen('s-fit')">▲ 健身</button>
-      </div>
-    </div>
-
-    <!-- AI monthly report section -->
-    <div class="ai-report-wrap" id="ai-report-section">
-      <div class="section-title" style="font-size:12px;color:var(--dim);letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">AI 財務報告 <span style="font-size:13px;padding:1px 5px;background:var(--gold);color:#000;font-family:'Space Mono',monospace;">PRO</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
-      <div id="ai-report-content">
-        <div class="pro-lock-banner" onclick="gotoScreen('s-paywall')">
-          <span style="font-size:14px;">◆</span>
-          <span id="ai-lock-text" style="flex:1;">升級 PRO 解鎖 AI 每月財務分析</span>
-          <span>▶</span>
-        </div>
-      </div>
+      <button class="add-btn" style="margin-top:8px;" onclick="gotoScreen('s-add')">+ <span data-i="add_btn">新增記帳</span></button>
     </div>
   </div>
 
@@ -1357,10 +1304,8 @@ body::after {
     <!-- log tabs -->
     <div id="fit-main">
       <div class="fit-tab-row">
-        <button class="fit-tab active" id="ftab-strength" onclick="setFitTab('strength')" data-i="ftab_strength">重訓</button>
-        <button class="fit-tab" id="ftab-cardio" onclick="setFitTab('cardio')" data-i="ftab_cardio">有氧</button>
-        <button class="fit-tab" id="ftab-body" onclick="setFitTab('body')" data-i="ftab_body">身體</button>
-        <button class="fit-tab" id="ftab-sleep" onclick="setFitTab('sleep')" data-i="ftab_sleep">睡眠</button>
+        <button class="fit-tab active" id="ftab-strength" onclick="setFitTab('strength')" data-i="ftab_strength">▲ 訓練</button>
+        <button class="fit-tab" id="ftab-body" onclick="setFitTab('body')" data-i="ftab_body">● 身體</button>
       </div>
 
       <!-- strength -->
@@ -2270,9 +2215,11 @@ function doSubscribe() {
 let fitAttrs = { str:24, agi:18, vit:31, spi:22 };
 
 function setFitTab(tab) {
-  ['strength','cardio','body','sleep'].forEach(t => {
-    document.getElementById('ftab-'+t).classList.toggle('active', t===tab);
-    document.getElementById('fp-'+t).classList.toggle('active', t===tab);
+  ['strength','body'].forEach(t => {
+    const tabEl = document.getElementById('ftab-'+t);
+    const panelEl = document.getElementById('fp-'+t);
+    if (tabEl) tabEl.classList.toggle('active', t===tab);
+    if (panelEl) panelEl.classList.toggle('active', t===tab);
   });
 }
 
